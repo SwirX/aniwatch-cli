@@ -1,0 +1,6 @@
+ai-remake/
+cache/
+debug/
+downloads/
+__pycache__/
+test.py
