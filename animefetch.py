@@ -14,7 +14,6 @@ allanime_api="https://api.allanime.day"
 mode = "sub"
 quality = "best"
 download_dir = "."
-ANI_CLI_NON_INTERACTIVE = False
 version_number="0.1.2"
 histfile = "ani-hsts"
 
@@ -343,7 +342,11 @@ if __name__ == "__main__":
     result = input()
     if not result:
         exit(1)
-    play(anime, result)
+    if not download:
+        play(anime, result)
+    else:
+        download()
+        raise NotImplementedError("Still no downloads now")
     
     
     while True:
