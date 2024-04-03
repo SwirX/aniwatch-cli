@@ -15,7 +15,7 @@ mode = "sub"
 quality = "best"
 download_dir = "."
 ANI_CLI_NON_INTERACTIVE = False
-version_number="0.1.2"
+version_number="4.6.1"
 histfile = "ani-hsts"
 
 def die(out:str) -> None:
@@ -69,17 +69,6 @@ def version_info() -> None:
     print(sys.argv[0] + "\n" f"{version_number}")
     exit(0)
     
-def update() -> None:
-    print("checking for updates")
-    req = requests.get("https://raw.githubusercontent.com/SwirX/aniwatch-cli/master/animefetch.py")
-    if not req:
-        die("couldn't check for updates")
-        return
-    with open("update", "w+") as update:
-        update.write(req.text)
-    os.system(f"python update.py {version_number}")
-    exit(0)
-
     
 def provider_init(resp, regex):
     match = re.search(regex, resp)
@@ -259,6 +248,7 @@ def fetch_links(sources: dict) -> list:
             continue
     return links
 
+
 def generate_cmd(link:str, anime:dict, ep:int, skip_opts:str) -> str:
     executable = "\"C:\\Program Files\\mpv\\mpv.exe\""
     if anime["availableEpisodes"][mode] >= 1000 and len(ep) < 4:
@@ -302,14 +292,12 @@ if __name__ == "__main__":
     query = ""
     for i in range(len(sys.argv)):
         arg = sys.argv[i]
-        if arg in ["-d", "--download", "--dl"]:
+        if arg == "-d":
             download = True
         elif arg in ["-s", "--skip"]:
             skip = True
-        elif arg in ["-e", "-ep", "--episode"]:
+        elif arg in ["-ep", "--episode"]:
             ep = sys.argv[i+1]
-        elif arg in ["-u", "--update"]:
-            update()
         elif arg == "--dub":
             mode = "dub"
         else:
