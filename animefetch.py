@@ -5,6 +5,7 @@ import subprocess
 import sys
 import time
 import requests
+from dotenv import load_dotenv
 
 import aniskip
 
@@ -14,8 +15,11 @@ allanime_api="https://api.allanime.day"
 mode = "sub"
 quality = "best"
 download_dir = "."
-version_number="0.1.2"
+version_number="0.1.3"
 histfile = "ani-hsts"
+skip = False
+
+load_dotenv()
 
 def die(out:str) -> None:
     print(out)
@@ -79,6 +83,21 @@ def update() -> None:
     os.system(f"python update.py {version_number}")
     exit(0)
 
+def dl_aniskip(force=False):
+    if os.path.isfile("aniskip.py") and os.path.isfile(f"{os.getenv("APPDATA")}/mpv/scripts/skip.lua") and not force:
+        print("Not downloaded. The files already exist.")
+        return
+    if force:
+        print("[FORCED DOWNLOAD]")
+    print("downloading ani-skip.py and skip.lua")
+    aniskip = requests.get("https://raw.githubusercontent.com/SwirX/aniwatch-cli/master/aniskip.py").text
+    skip = requests.get("https://raw.githubusercontent.com/SwirX/aniwatch-cli/master/skip.lua").text
+    if aniskip == "" and skip == "":
+        die("couldn't get the files")
+    with open("aniskip.py", "w+") as aniskipfile:
+        aniskipfile.write(aniskip)
+    with open(f'{os.getenv("APPDATA")}/mpv/scripts/skip.lua', "w+") as skipfile:
+        skipfile.write(skip)
     
 def provider_init(resp, regex):
     match = re.search(regex, resp)
@@ -292,11 +311,16 @@ def play(anime, ep):
             print("vipanicdn loaded")
     
     link = links_list[0]
-    skip_options = aniskip.build_flags(title, ep)
+    skip_options = ""
+    if skip:
+        skip_options = aniskip.build_flags(title, ep)
     cmd = generate_cmd(link, anime, ep, skip_options)
     print(cmd)
     subprocess.Popen(cmd, shell=True)
     
+def download() -> None:
+    raise NotImplementedError("Still no downloads for now")
+
 if __name__ == "__main__":
     query = ""
     for i in range(len(sys.argv)):
@@ -307,7 +331,11 @@ if __name__ == "__main__":
             skip = True
         elif arg in ["-e", "-ep", "--episode"]:
             ep = sys.argv[i+1]
-        elif arg in ["-u", "--update"]:
+        elif arg in ["-u", "--update", "-us", "--us", "-usf", "--usf"]:
+            if "sf" in arg:
+                dl_aniskip(True)
+            elif "s" in arg:
+                dl_aniskip()
             update()
         elif arg == "--dub":
             mode = "dub"
@@ -346,7 +374,6 @@ if __name__ == "__main__":
         play(anime, result)
     else:
         download()
-        raise NotImplementedError("Still no downloads now")
     
     
     while True:
