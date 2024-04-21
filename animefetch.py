@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 import aniskip
 
+download = False
 agent="Mozilla/5.0 (Windows NT 6.1; Win64; rv:109.0) Gecko/20100101 Firefox/109.0"
 allanime_base="https://allanime.to"
 allanime_api="https://api.allanime.day"
@@ -133,8 +134,18 @@ def search_anime(query) -> list:
         ) {
             edges {
                 _id
+                malId
+                aniListId
                 name
                 availableEpisodes
+                banner
+                thumbnail
+                episodeCount
+                rating
+                score
+                status
+                genres
+                tags
                 __typename
             }
         }
@@ -161,7 +172,7 @@ def search_anime(query) -> list:
             "User-Agent": agent
         }
     ).json()
-    
+    die(resp)
     anime_list = []
     if "data" in resp and "shows" in resp["data"]:
         for edge in resp["data"]["shows"]["edges"]:
@@ -211,16 +222,17 @@ def episodes_list(id) -> list:
 
 def get_sources_url(id, ep):
     episode_embed_gql = '''
-        query ($showId: String!, $translationType: VaildTranslationTypeEnumType!, $episodeString: String!) {
-            episode(
-                showId: $showId
-                translationType: $translationType
-                episodeString: $episodeString
-            ) {
-                episodeString
-                sourceUrls
+            query ($showId: String!, $translationType: VaildTranslationTypeEnumType!, $episodeString: String!) {
+                episode(
+                    showId: $showId
+                    translationType: $translationType
+                    episodeString: $episodeString
+                ) {
+                    episodeString
+                    sourceUrls
+                    title
+                }
             }
-        }
     '''
 
     payload = {
@@ -370,10 +382,7 @@ if __name__ == "__main__":
     result = input()
     if not result:
         exit(1)
-    if not download:
-        play(anime, result)
-    else:
-        download()
+    play(anime, result)
     
     
     while True:

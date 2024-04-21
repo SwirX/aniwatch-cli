@@ -3,4 +3,5 @@ cache/
 debug/
 downloads/
 __pycache__/
+responses-examples/
 test.py
