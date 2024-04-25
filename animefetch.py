@@ -7,7 +7,7 @@ import time
 import requests
 from dotenv import load_dotenv
 
-import aniskip
+import plugins.aniskip as aniskip
 
 download = False
 agent="Mozilla/5.0 (Windows NT 6.1; Win64; rv:109.0) Gecko/20100101 Firefox/109.0"
@@ -81,7 +81,7 @@ def update() -> None:
         return
     with open("update", "w+") as update:
         update.write(req.text)
-    os.system(f"python update.py {version_number}")
+    os.system(f"python plugins/update.py {version_number}")
     exit(0)
 
 def dl_aniskip(force=False):
